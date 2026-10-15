@@ -5,11 +5,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: CopyAnything
     steps:
       - uses: actions/checkout@v4
+      - name: Find project folder
+        run: |
+          F=$(find . -name settings.gradle.kts | head -1)
+          echo "Found: $F"
+          echo "DIR=$(dirname "$F")" >> $GITHUB_ENV
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -17,8 +19,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.9
-      - run: gradle assembleDebug
+      - run: gradle assembleDebug -p "$DIR"
       - uses: actions/upload-artifact@v4
         with:
           name: CopyAnything-debug-apk
-          path: CopyAnything/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ env.DIR }}/app/build/outputs/apk/debug/app-debug.apk
